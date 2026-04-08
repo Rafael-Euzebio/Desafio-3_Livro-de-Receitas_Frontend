@@ -1,11 +1,18 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import MealDetail from "./pages/MealDetail";
+
 function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-center text-4xl font-semibold text-stone-900">
-        Desafio 3: Livro de Receitas
-      </h1>
-    </main>
-  )
+    <BrowserRouter>
+      <main className="min-h-screen bg-gray-100">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/meal/:mealId" element={<MealDetail />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
