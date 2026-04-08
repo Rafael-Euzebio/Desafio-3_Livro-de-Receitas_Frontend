@@ -1,272 +1,118 @@
-# Desafio 3 — Explorador de Receitas
+# 🍽️ Livro de Receitas
 
-## Visão geral
+Aplicação desenvolvida como solução do **Desafio 3 — Explorador de Receitas**.
 
-Neste desafio, você irá construir uma aplicação com múltiplas páginas que consome dados da API **TheMealDB**.
+A interface permite buscar receitas por nome, filtrar por categoria, ver detalhes completos e navegar entre páginas com React Router.
 
-O objetivo é permitir que o usuário explore receitas e visualize detalhes de cada uma.
+## 🚀 Visão geral
 
-A aplicação deve incluir navegação entre páginas, consumo de API e renderização dinâmica de conteúdo.
+- Busca de receitas por nome
+- Filtro de categorias com estado ativo
+- Navegação entre página inicial e detalhe da receita
+- Exibição de dados completos da receita:
+  - nome
+  - imagem
+  - categoria
+  - origem
+  - instruções
+  - ingredientes
+  - vídeo
+- Tratamento de estados de carregamento e erro
+- Layout responsivo para desktop e mobile
 
-![Exemplo catálogo](./examples/catalog.png)
+## 🧩 Tecnologias usadas
 
-![Exemplo detalhe](./examples/details.png)
+- React 19
+- Vite
+- TypeScript
+- Tailwind CSS
+- React Router DOM
 
----
+## 🌐 API
 
-## Stack obrigatória
+O projeto consome os dados da API pública **TheMealDB**:
 
-A implementação deve utilizar:
+https://www.themealdb.com/api.php
 
-* **React**
-* **Vite**
-* **TypeScript**
-* **Tailwind CSS**
-* **React Router**
+## 📦 Scripts disponíveis
 
----
+Use os comandos abaixo a partir da raiz do projeto:
 
-## Objetivo
-
-Construir uma aplicação que permita:
-
-* explorar receitas
-* navegar entre páginas
-* visualizar detalhes de uma receita
-
----
-
-## Estrutura obrigatória
-
-A aplicação deve possuir pelo menos duas páginas:
-
-* `/` → listagem de receitas
-* `/meal/:mealId` → detalhes da receita
-
----
-
-## API utilizada
-
-Utilize a **TheMealDB API**:
-
-[https://www.themealdb.com/api.php](https://www.themealdb.com/api.php)
-
-A API permite uso da chave de teste `1` para desenvolvimento e fins educacionais.
-
-### URLs úteis para este desafio
-
-**Buscar receita por nome**
-
-```
-https://www.themealdb.com/api/json/v1/1/search.php?s=Arrabiata
+```bash
+npm install
+npm run dev
+npm run build
+npm run preview
+npm run lint
 ```
 
-**Buscar receitas pela primeira letra**
+## 💻 Como executar localmente
 
-```
-https://www.themealdb.com/api/json/v1/1/search.php?f=a
-```
+1. Clone o repositório:
 
-**Buscar detalhes de uma receita por ID**
-
-```
-https://www.themealdb.com/api/json/v1/1/lookup.php?i=52772
+```bash
+git clone https://github.com/GilAlvesOliveira/Desafio-3_Livro-de-Receitas.git
 ```
 
-**Listar categorias**
+2. Entre na pasta do projeto:
 
-```
-https://www.themealdb.com/api/json/v1/1/list.php?c=list
-```
-
-**Listar áreas (origem das receitas)**
-
-```
-https://www.themealdb.com/api/json/v1/1/list.php?a=list
+```bash
+cd Desafio-3_Livro-de-Receitas
 ```
 
-**Filtrar por categoria**
-
-```
-https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood
-```
-
-**Filtrar por área**
-
-```
-https://www.themealdb.com/api/json/v1/1/filter.php?a=Canadian
-```
-
-### Observação
-
-Você pode utilizar qualquer combinação desses endpoints, desde que a aplicação:
-
-* permita explorar receitas
-* navegue para uma de detalhes da receita escolhida
-* carregue dados reais da API
-
----
-
-## Comportamento da página inicial
-
-A página inicial deve permitir ao usuário explorar receitas.
-
-Você deve implementar **pelo menos uma** das opções abaixo:
-
-* busca por nome
-* filtro por primeira letra
-* filtro por categoria
-* filtro por área
-
----
-
-### Comportamento esperado
-
-* Deve existir um mecanismo claro de busca/filtros (input ou botões)
-* A listagem deve ser atualizada dinamicamente com base na interação
-* Os itens devem ser exibidos em formato de grid ou lista responsiva
-
-Cada item deve conter, no mínimo:
-
-* imagem
-* nome
-
----
-
-## Navegação
-
-Ao clicar em uma receita, o usuário deve ser redirecionado para:
-
-```
-/meal/:mealId
-```
-
----
-
-## Página de detalhe
-
-A página de detalhe deve exibir:
-
-* nome da receita
-* imagem
-* categoria
-* instruções
-
-Também deve conter:
-
-* botão ou link de voltar
-
----
-
-## Estados da aplicação
-
-A aplicação deve tratar:
-
-* loading
-* erro
-
-Esses estados devem ser visíveis para o usuário.
-
----
-
-## Responsividade
-
-A interface deve funcionar corretamente em:
-
-* desktop
-* mobile
-
-Evite:
-
-* scroll horizontal
-* layouts quebrados
-* elementos sobrepostos
-
----
-
-## Requisitos obrigatórios
-
-Para aprovação no desafio:
-
-* utilizar React Router
-* possuir pelo menos duas páginas
-* consumir a API TheMealDB
-* renderizar dados dinâmicos
-* implementar pelo menos uma forma de exploração (busca ou filtro)
-* navegar para página de detalhe
-* exibir dados completos da receita
-* tratar loading e erro
-* interface responsiva
-* projeto compilar (`npm run build`)
-* aplicação em produção (deploy)
-
----
-
-## Melhorias opcionais
-
-Os itens abaixo aumentam a qualidade da solução:
-
-* busca + filtro combinados
-* múltiplos filtros
-* categorias com estado ativo
-* navegação por categoria (clicar na categoria no detalhe e voltar filtrado)
-* exibir ingredientes
-* integração com vídeo da receita
-* melhor hierarquia visual
-* componentes reutilizáveis
-* organização de código mais estruturada
-
----
-
-## Como desenvolver e entregar
-
-### 1. Fork do repositório
-
-Faça um fork deste repositório para sua conta.
-
----
-
-### 2. Configure o projeto
+3. Instale as dependências:
 
 ```bash
 npm install
 ```
 
-Configure o Tailwind CSS seguindo a documentação oficial:
-
-[https://tailwindcss.com/docs/installation](https://tailwindcss.com/docs/installation)
-
----
-
-### 3. Desenvolva a aplicação
-
-Implemente as páginas e comportamentos descritos no desafio.
-
----
-
-### 4. Rode localmente
+4. Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
----
-
-### 5. Build
+5. Abra o endereço mostrado no terminal, geralmente:
 
 ```bash
-npm run build
+http://localhost:5173
 ```
 
----
+## 🗂️ Estrutura do projeto
 
-## 6. Envie sua solução
+```text
+src/
+  App.tsx
+  main.tsx
+  index.css
+  components/
+    MealCard.tsx
+    SearchBar.tsx
+    StatusMessage.tsx
+  pages/
+    Home.tsx
+    MealDetail.tsx
+  services/
+    mealApi.ts
+  types/
+    meal.ts
+```
 
-Abra um **Pull Request do seu fork para este repositório**, contendo screenshots do layout em **desktop e mobile**
+## ✅ Funcionalidades
 
-Após o envio, sua solução será revisada. Feedback poderá ser fornecido antes da aprovação.
+- Listagem de receitas
+- Busca por nome
+- Filtro por categoria
+- Navegação entre páginas
+- Detalhes completos da receita
+- Vídeo de preparo incorporado
+- Interface responsiva
 
-## 7. Solução de Referência
-Esse site demonstra um modelo de solução, que implementa todos os requisitos obrigatórios e opcionais do desafio:
+## 📌 Observações
 
-https://desafio-3-solution.vercel.app/
+- Configure o deploy adicionando o link de publicação nesta seção.
+- Para melhores resultados, garanta conexão com a internet, pois a aplicação depende da API externa.
+
+## 📄 Licença
+
+Projeto criado para fins de estudo e desafio. Sinta-se à vontade para usar e adaptar o código.
