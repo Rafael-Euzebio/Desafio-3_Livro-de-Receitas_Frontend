@@ -1,5 +1,5 @@
 
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "contained" | "outlined";
 type Color = "default" | "alert" | "error" | "success";
@@ -8,12 +8,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: Variant;
     color?: Color;
     onFunction: () => void;
+    children?: ReactNode;
 }
 
 export function Button({
     variant = "contained",
     color = "default",
     onFunction = () => { },
+    children = undefined,
     ...rest
 }: ButtonProps) {
     const base =
@@ -59,10 +61,21 @@ export function Button({
     };
 
     return (
-        <button
-            onClick={() => onFunction()}
-            className={`${base} ${variantStyles[variant]} ${colors[color].ring}`}
-            {...rest}
-        />
+        children ? (
+            <button
+                onClick={() => onFunction()}
+                className={`${base} ${variantStyles[variant]} ${colors[color].ring}`}
+                {...rest}
+            >
+                {children}
+            </button>
+
+        ) : (
+            <button
+                onClick={() => onFunction()}
+                className={`${base} ${variantStyles[variant]} ${colors[color].ring}`}
+                {...rest}
+            />
+        )
     );
 }
