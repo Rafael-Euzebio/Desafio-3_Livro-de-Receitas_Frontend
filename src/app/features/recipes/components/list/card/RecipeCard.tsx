@@ -1,14 +1,16 @@
-import type { Recipe } from "../../../types/recipe.type";
+import { Button } from "../../../../../components/Header/ActionButton";
+import type { RecipeCardItem } from "../../../types/recipe.type";
 
 
 interface Props {
-    recipe: Recipe;
-    onViewDetails: (recipe: Recipe) => void;
+    recipe: RecipeCardItem;
+    aplicatedFilter: boolean;
+    onViewDetails: (recipeId: string) => void;
 }
 
-export function RecipeCard({ recipe, onViewDetails }: Props) {
+export function RecipeCard({ recipe, onViewDetails, aplicatedFilter }: Props) {
     return (
-        <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-xl w-full  max-w-80 min-w-80  border bg-white shadow-sm overflow-hidden">
 
             <img
                 src={recipe.image}
@@ -16,7 +18,7 @@ export function RecipeCard({ recipe, onViewDetails }: Props) {
                 className="h-40 w-full object-cover"
             />
 
-            <div className="p-4 flex flex-col gap-2">
+            <div className="p-4 flex flex-col  justify-around    gap-2">
                 <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 w-fit">
                     {recipe.category}
                 </span>
@@ -25,21 +27,15 @@ export function RecipeCard({ recipe, onViewDetails }: Props) {
                     {recipe.name}
                 </h3>
 
-                <div className="text-sm text-gray-500 flex gap-3">
-                    <span>⏱ {recipe.time} min</span>
-                    <span>📌 {recipe.difficulty}</span>
-                </div>
 
-                <p className="text-sm text-gray-600 line-clamp-2">
-                    {recipe.description}
-                </p>
+                <Button
+                    children={aplicatedFilter ?"Ver receita Completa" : "Ver Detalhes"}
+                    onFunction={() => onViewDetails(recipe.id)}
+                    variant="outlined"
+                    color="success"
+                />
 
-                <button
-                    onClick={() => onViewDetails(recipe)}
-                    className="mt-2 border border-green-600 text-green-600 rounded-lg py-2 text-sm hover:bg-green-50 transition"
-                >
-                    Ver Detalhes
-                </button>
+
             </div>
         </div>
     );

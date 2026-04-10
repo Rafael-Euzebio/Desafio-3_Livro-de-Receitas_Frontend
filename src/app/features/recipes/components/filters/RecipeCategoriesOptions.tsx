@@ -3,23 +3,20 @@ import { FilterChip } from "./Filterchip";
 import type { FilterOption } from "../../types/category.types";
 
 
-
 interface RecipeCategoriesOptionsProps {
     loadingCategories: boolean;
     selectedCategories: string[];
-    selectedExtraFilters: string[];
     clearCategories: () => void;
-    toggleCategory: (category: string) => void;
+    toggleCategory: (category: string, isCategory: boolean) => void;
     resultSetCategories: FilterOption[];
     search: string;
     onFiltersChange?: (filters: {
         search: string;
         selectedCategories: string[];
-        selectedExtraFilters: string[];
-    }) => void;
+    }, isCategory: boolean) => void;
 }
 
-export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, loadingCategories, selectedCategories, selectedExtraFilters, clearCategories, onFiltersChange, search }: RecipeCategoriesOptionsProps) {
+export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, loadingCategories, selectedCategories, onFiltersChange, search }: RecipeCategoriesOptionsProps) {
     return (
         <div className=" flex flex-col lg:flex-row py-4 space-x-6">
             <FilterSection title="Filtrar por categorias">
@@ -27,13 +24,11 @@ export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, l
                     label="Todas"
                     active={selectedCategories.length === 0}
                     onClick={() => {
-                        clearCategories();
 
                         onFiltersChange?.({
                             search,
                             selectedCategories: [],
-                            selectedExtraFilters,
-                        });
+                        }, false);
                     }}
                 />
 
@@ -51,7 +46,7 @@ export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, l
                             key={category.id}
                             label={category.label}
                             active={selectedCategories.includes(category.value)}
-                            onClick={() => toggleCategory(category.value)}
+                            onClick={() => toggleCategory(category.value, true)}
                         />
                     ))}
             </FilterSection>

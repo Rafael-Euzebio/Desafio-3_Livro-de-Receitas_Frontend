@@ -1,19 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 
 import { mapRecipeToCard } from "../mappers/recipe.maper";
 import { recipesByNameMock } from "../../../mocks/recipes.mock";
-import type { RecipeCardItem, RecipesByNameResponse } from "../types/recipe.type";
+import type { RecipeApiItem, RecipeCardItem, RecipesByNameResponse } from "../types/recipe.type";
 
 
 interface UseRequestRecipesParams {
     search?: string;
     autoFetch?: boolean;
+    currentRecepts?: RecipesByNameResponse;
 }
 
 interface UseRequestRecipesReturn {
     loadingRecipes: boolean;
-    resultSetRecipes: RecipeCardItem[];
+    resultSetRecipesToCard: RecipeCardItem[];
+    recipeSearchFiltered: RecipeCardItem[] | (() => RecipeCardItem[]);
+    resultSetRecipes: RecipeApiItem[];
     errorRecipes: string | null;
     refetchRecipes: () => Promise<void>;
     isUsingMock: boolean;
@@ -22,9 +25,11 @@ interface UseRequestRecipesReturn {
 export function useRequestRecipes({
     search = "",
     autoFetch = true,
+    currentRecepts,
 }: UseRequestRecipesParams = {}): UseRequestRecipesReturn {
     const [loadingRecipes, setLoadingRecipes] = useState(false);
-    const [resultSetRecipes, setResultSetRecipes] = useState<RecipeCardItem[]>([]);
+    const [resultSetRecipesToCard, setResultSetRecipesToCard] = useState<RecipeCardItem[]>([]);
+    const [resultSetRecipes, setResultSetRecipes] = useState<RecipeApiItem[]>([]);
     const [errorRecipes, setErrorRecipes] = useState<string | null>(null);
     const [isUsingMock, setIsUsingMock] = useState(false);
 
@@ -46,17 +51,19 @@ export function useRequestRecipes({
                 throw new Error("Erro ao buscar receitas");
             }
 
-            const data: RecipesByNameResponse = await response.json();
+            const responseJson = await response.json();
+            const data: RecipesByNameResponse = responseJson;
 
             const mapped = (data.meals ?? []).map(mapRecipeToCard);
 
-            setResultSetRecipes(mapped);
+            setResultSetRecipesToCard(mapped);
+            setResultSetRecipes(responseJson.meals);
         } catch (error) {
             console.warn("API falhou ao buscar receitas por nome, usando mock.");
 
             const mappedMock = (recipesByNameMock.meals ?? []).map(mapRecipeToCard);
 
-            setResultSetRecipes(mappedMock);
+            setResultSetRecipesToCard(mappedMock);
             setIsUsingMock(true);
 
             const message =
@@ -66,7 +73,31 @@ export function useRequestRecipes({
         } finally {
             setLoadingRecipes(false);
         }
-    }, [search]);
+    }, []);
+
+    function normalize(text: string) {
+        return text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+    const recipeSearchFiltered = useMemo(() => {
+        const recepts = currentRecepts?.meals && currentRecepts?.meals?.length > 0 ? currentRecepts.meals : resultSetRecipes;
+        if (!search.trim()) {
+            return [];
+        }
+
+        const normalizedSearch = normalize(search);
+        const resultSet = recepts?.filter((recipe) =>
+            normalize(recipe?.strMeal || '').includes(normalizedSearch)
+        );
+
+        return (resultSet ?? []).map(mapRecipeToCard);
+    }, [search, currentRecepts, resultSetRecipes]);
+
+
+
+
 
     useEffect(() => {
         if (!autoFetch) return;
@@ -76,6 +107,8 @@ export function useRequestRecipes({
     return {
         loadingRecipes,
         resultSetRecipes,
+        resultSetRecipesToCard,
+        recipeSearchFiltered,
         errorRecipes,
         refetchRecipes: fetchRecipes,
         isUsingMock,

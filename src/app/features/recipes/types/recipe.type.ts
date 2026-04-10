@@ -22,11 +22,11 @@ export interface RecipeApiItem {
 }
 
 export interface RecipesByNameResponse {
-  meals: RecipeApiItem[] | null;
+  meals: RecipeApiItem[];
 }
 
 export interface RecipesByCategoryResponse {
-  meals: Array<Pick<RecipeApiItem, "idMeal" | "strMeal" | "strMealThumb">> | null;
+  meals: Array<Pick<RecipeApiItem, "idMeal" | "strMeal" | "strMealThumb">>;
 }
 
 export interface RecipeCardItem {
