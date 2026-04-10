@@ -22,6 +22,10 @@ export function RecipesList({ recipes, onSelect, aplicatedFilter }: Props) {
                 <h2 className="font-semibold text-2xl">Receitas</h2>
             </div>
 
+
+
+            
+
             {!recipes || recipes.length === 0 ? (
                 <EmptyState />
             ) : (
