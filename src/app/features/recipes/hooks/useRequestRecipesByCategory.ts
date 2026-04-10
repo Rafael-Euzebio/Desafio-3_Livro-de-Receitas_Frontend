@@ -27,7 +27,7 @@ export function useRequestRecipesByCategory({
     const [errorRecipesByCategory, setErrorRecipesByCategory] = useState<string | null>(null);
     const [isUsingMock, setIsUsingMock] = useState(false);
 
-    const fetchRecipesByCategory = useCallback(async () => {
+    const fetchRecipesByCategory = useCallback(async () => {        
         if (!category || category.length === 0) {
             setResultSetRecipesByCategory(undefined);
             setResultSetRecipesByCategoryToCard([]);

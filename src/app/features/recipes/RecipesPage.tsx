@@ -21,7 +21,7 @@ export function RecipesPage() {
         selectedCategories: string[];
     }, isCategory: boolean) {
         if (isCategory) {
-            setOpenSidebar(false)
+            setOpenSidebar(false)            
             setCategoryFilter(filters.selectedCategories);
         }
     }
@@ -48,7 +48,7 @@ export function RecipesPage() {
     const resultSelected = resultSetRecipesByCategoryToCard.length > 0 ? resultSetRecipesByCategoryToCard : resultSetRecipesToCard
     const resultBaseToDetails = resultByCategoryIsExist ? resultSetRecipesByCategory?.meals : resultSetRecipes
 
-    const handleControlSidebar = (recipeId: string | null) => {
+    const handleControlSidebar = (recipeId: string | null) => {        
         setSelected(recipeId)
         setOpenSidebar(!!recipeId);
     }

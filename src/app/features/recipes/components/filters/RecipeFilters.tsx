@@ -42,7 +42,7 @@ export function RecipeFilters({
     });
 
 
-    function prepareSearch (text: string){
+    function prepareSearch(text: string) {
         handleSearchChange(text);
         setSearchValue(text);
     }
@@ -64,11 +64,11 @@ export function RecipeFilters({
                 <SearchRecipeFilter handleControlOpenCategory={handleControlOpenCategory} handleSearchChange={prepareSearch} search={search} />
                 <RecipeCategoriesOptions
                     clearCategories={clearCategories}
+                    prepareSearch={prepareSearch}
                     loadingCategories={loadingCategories}
                     resultSetCategories={resultSetCategories}
                     search={search}
                     selectedCategories={selectedCategories}
-
                     toggleCategory={toggleCategory}
                     onFiltersChange={onFiltersChange}
                 />

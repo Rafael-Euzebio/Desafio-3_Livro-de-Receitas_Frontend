@@ -7,6 +7,7 @@ interface RecipeCategoriesOptionsProps {
     loadingCategories: boolean;
     selectedCategories: string[];
     clearCategories: () => void;
+    prepareSearch: (text: string) => void;
     toggleCategory: (category: string, isCategory: boolean) => void;
     resultSetCategories: FilterOption[];
     search: string;
@@ -16,7 +17,7 @@ interface RecipeCategoriesOptionsProps {
     }, isCategory: boolean) => void;
 }
 
-export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, loadingCategories, selectedCategories, onFiltersChange, search }: RecipeCategoriesOptionsProps) {
+export function RecipeCategoriesOptions({ toggleCategory, prepareSearch, clearCategories, resultSetCategories, loadingCategories, selectedCategories, onFiltersChange, search }: RecipeCategoriesOptionsProps) {
     return (
         <div className=" flex flex-col lg:flex-row py-4 space-x-6">
             <FilterSection title="Filtrar por categorias">
@@ -24,7 +25,8 @@ export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, l
                     label="Todas"
                     active={selectedCategories.length === 0}
                     onClick={() => {
-
+                        prepareSearch('')
+                        clearCategories()
                         onFiltersChange?.({
                             search,
                             selectedCategories: [],
@@ -46,7 +48,12 @@ export function RecipeCategoriesOptions({ toggleCategory, resultSetCategories, l
                             key={category.id}
                             label={category.label}
                             active={selectedCategories.includes(category.value)}
-                            onClick={() => toggleCategory(category.value, true)}
+                            onClick={() => {
+
+                                prepareSearch('')
+                                toggleCategory(category.value, true)
+                            }
+                            }
                         />
                     ))}
             </FilterSection>

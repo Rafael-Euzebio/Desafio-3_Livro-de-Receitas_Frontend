@@ -43,7 +43,7 @@ export function useRecipeFilters({
         onFiltersChange?.(nextState, true);
     }
 
-    function toggleCategory(category: string) {
+    function toggleCategory(category: string) {        
         setSelectedCategories(() => {
             const updated = [category]
 
