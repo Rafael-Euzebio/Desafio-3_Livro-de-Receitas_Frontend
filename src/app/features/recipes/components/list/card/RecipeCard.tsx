@@ -28,6 +28,7 @@ export function RecipeCard({ recipe, onViewDetails, aplicatedFilter }: Props) {
                 </h3>
 
 
+            
                 <Button
                     children={aplicatedFilter ?"Ver receita Completa" : "Ver Detalhes"}
                     onFunction={() => onViewDetails(recipe.id)}

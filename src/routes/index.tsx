@@ -1,7 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "../app/layouts/AppLayout";
 import { RecipesPage } from "../app/features/recipes/RecipesPage";
-import { RecipeDataPage } from "../app/features/recipe-data/RecipeDataPage";
+import { RecipeDetailsPage } from "../app/features/recipe-data/RecipeDataPage";
+import { NotFound } from "../app/components/notfound/NotFoundComponent";
 
 
 export const router = createBrowserRouter([
@@ -19,11 +20,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/receita/:id",
-        element: <RecipeDataPage />,
+        element: <RecipeDetailsPage />,
       },
       {
         path: "*",
-        element: <>NOTFOUND PAGE</>,
+        element: <NotFound  title="PAGINA NÃO ENCONTRADA" />,
       },
     ]
   },
