@@ -44,7 +44,7 @@ export function useRecipeFilters({
     }
 
     function toggleCategory(category: string) {
-        setSelectedCategories(prev => {
+        setSelectedCategories(() => {
             const updated = [category]
 
             emitFiltersChange({
