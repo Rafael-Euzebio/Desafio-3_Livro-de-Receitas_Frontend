@@ -14,90 +14,60 @@ export interface ActiveFilterItem {
 export interface RecipeFiltersState {
     search: string;
     selectedCategories: string[];
-    selectedExtraFilters: string[];
+
 }
 
 interface UseRecipeFiltersParams {
-    extraFilters: ExtraFilterOption[];
-    onFiltersChange?: (filters: RecipeFiltersState) => void;
+    onFiltersChange?: (filters: RecipeFiltersState, isCategory: boolean) => void;
 }
 
 interface UseRecipeFiltersReturn {
     search: string;
     selectedCategories: string[];
-    selectedExtraFilters: string[];
+
     activeFilters: ActiveFilterItem[];
     handleSearchChange: (value: string) => void;
     toggleCategory: (category: string) => void;
-    toggleExtraFilter: (filterId: string) => void;
     clearAllFilters: () => void;
     handleRemoveActiveFilter: (item: ActiveFilterItem) => void;
     clearCategories: () => void;
 }
 
 export function useRecipeFilters({
-    extraFilters,
     onFiltersChange,
 }: UseRecipeFiltersParams): UseRecipeFiltersReturn {
     const [search, setSearch] = useState('');
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [selectedExtraFilters, setSelectedExtraFilters] = useState<string[]>([]);
 
     function emitFiltersChange(nextState: RecipeFiltersState) {
-        onFiltersChange?.(nextState);
+        onFiltersChange?.(nextState, true);
     }
 
-    function toggleCategory(category: string) {
-        setSelectedCategories(prev => {
-            const updated = prev.includes(category)
-                ? prev.filter(item => item !== category)
-                : [...prev, category];
+    function toggleCategory(category: string) {        
+        setSelectedCategories(() => {
+            const updated = [category]
 
             emitFiltersChange({
                 search,
                 selectedCategories: updated,
-                selectedExtraFilters,
             });
 
             return updated;
         });
     }
 
-    function toggleExtraFilter(filterId: string) {
-        setSelectedExtraFilters(prev => {
-            const updated = prev.includes(filterId)
-                ? prev.filter(item => item !== filterId)
-                : [...prev, filterId];
-
-            emitFiltersChange({
-                search,
-                selectedCategories,
-                selectedExtraFilters: updated,
-            });
-
-            return updated;
-        });
-    }
 
     function handleSearchChange(value: string) {
         setSearch(value);
-
-        emitFiltersChange({
-            search: value,
-            selectedCategories,
-            selectedExtraFilters,
-        });
     }
 
     function clearAllFilters() {
         setSearch('');
         setSelectedCategories([]);
-        setSelectedExtraFilters([]);
 
         emitFiltersChange({
             search: '',
             selectedCategories: [],
-            selectedExtraFilters: [],
         });
     }
 
@@ -107,7 +77,7 @@ export function useRecipeFilters({
         emitFiltersChange({
             search,
             selectedCategories: [],
-            selectedExtraFilters,
+
         });
     }
 
@@ -118,16 +88,9 @@ export function useRecipeFilters({
             type: 'category' as const,
         }));
 
-        const extras = extraFilters
-            .filter(filter => selectedExtraFilters.includes(filter.id))
-            .map(filter => ({
-                id: filter.id,
-                label: filter.label,
-                type: 'extra' as const,
-            }));
 
-        return [...categories, ...extras];
-    }, [extraFilters, selectedCategories, selectedExtraFilters]);
+        return [...categories];
+    }, [selectedCategories]);
 
     function handleRemoveActiveFilter(item: ActiveFilterItem) {
         if (item.type === 'category') {
@@ -137,30 +100,25 @@ export function useRecipeFilters({
             emitFiltersChange({
                 search,
                 selectedCategories: updated,
-                selectedExtraFilters,
+
             });
 
             return;
         }
 
-        const updated = selectedExtraFilters.filter(filter => filter !== item.id);
-        setSelectedExtraFilters(updated);
 
         emitFiltersChange({
             search,
             selectedCategories,
-            selectedExtraFilters: updated,
         });
     }
 
     return {
         search,
         selectedCategories,
-        selectedExtraFilters,
         activeFilters,
         handleSearchChange,
         toggleCategory,
-        toggleExtraFilter,
         clearAllFilters,
         handleRemoveActiveFilter,
         clearCategories,

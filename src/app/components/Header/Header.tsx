@@ -1,6 +1,6 @@
 import Logo from "../../../assets/images/logo-receitas.png"
 import { Headertitle } from "./HeaderTitle";
-import { HeaderActions } from "./HeaderActions";
+
 
 export interface HeaderProps {
     title: string;
@@ -15,7 +15,7 @@ export function Header({
     return (
         <header className="w-full flex flex-col sm:flex-row border-b border-gray-200 bg-white  justify-between px-4 py-2 sm:px-6 sm:py-4">
             <Headertitle title={title} subtitle={subtitle} logo={Logo} />
-            <HeaderActions buttonFavoriteFunction={() => { }} buttonHomeFunction={() => { }} />
+            {/* <HeaderActions buttonFavoriteFunction={() => { }} buttonHomeFunction={() => { }} /> */}
         </header>
     );
 }

@@ -1,42 +1,32 @@
 import { useRequestCategories } from '../../hooks/useRequestCategories';
-import { ActiveFilters } from './ActiveFilter';
 import { useRecipeFilters } from '../../hooks/useRecipeFilters';
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { ExtraFilters, type ExtraFilterOption } from './ExtraFilters';
+import { type ExtraFilterOption } from './ExtraFilters';
 import { SearchRecipeFilter } from './SearchRecipeFilter';
 import { Button } from '../../../../components/Header/ActionButton';
 import { RecipeCategoriesOptions } from './RecipeCategoriesOptions';
 
 
-
-
-
-
 interface MealFiltersProps {
     extraFilters?: ExtraFilterOption[];
+    setSearchValue: (search: string) => void;
     onFiltersChange?: (filters: {
         search: string;
         selectedCategories: string[];
-        selectedExtraFilters: string[];
-    }) => void;
+    }, isCategory: boolean) => void;
 }
-const extraFiltersArray = [
-    { id: 'quick', label: 'Rápidas (até 30 min)' },
-    { id: 'easy', label: 'Fáceis' },
-    { id: 'healthy', label: 'Saudáveis' },
-] satisfies ExtraFilterOption[];
+
 
 
 export function RecipeFilters({
-    extraFilters = extraFiltersArray,
     onFiltersChange,
+    setSearchValue,
 }: MealFiltersProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
 
 
     function handleControlOpenCategory() {
-        console.log('aqui')
         setIsOpen((prev) => !prev)
     }
 
@@ -44,27 +34,26 @@ export function RecipeFilters({
     const {
         search,
         selectedCategories,
-        selectedExtraFilters,
-        activeFilters,
         handleSearchChange,
         toggleCategory,
-        toggleExtraFilter,
-        clearAllFilters,
-        handleRemoveActiveFilter,
         clearCategories,
     } = useRecipeFilters({
-        extraFilters,
-        onFiltersChange,
+        onFiltersChange
     });
 
-    console.log({isOpen})
+
+    function prepareSearch(text: string) {
+        handleSearchChange(text);
+        setSearchValue(text);
+    }
 
 
     return (
         <section
             className={`rounded-2xl ${isOpen && 'space-y-6'}  border border-gray-200 bg-white px-4 shadow-sm  `}>
             {!isOpen && (
-                <div className={`w-full flex flex-row cursor-pointer py-2  justify-end items-end`}>
+                <div className={`w-full flex flex-row cursor-pointer py-2  justify-between items-start`}>
+                    <span className=''>FILTRO DE RECEITAS</span>
                     <Button variant="outlined" onFunction={handleControlOpenCategory}>
                         <ChevronDown />
                     </Button>
@@ -72,23 +61,22 @@ export function RecipeFilters({
             )}
             <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "mt-4 max-h-[500px] opacity-100" : "max-h-0 opacity-0"
                 } lg:mt-4 ${isOpen && 'max-h-none'}  `}>
-                <SearchRecipeFilter handleControlOpenCategory={handleControlOpenCategory} handleSearchChange={handleSearchChange} search={search} />
+                <SearchRecipeFilter handleControlOpenCategory={handleControlOpenCategory} handleSearchChange={prepareSearch} search={search} />
                 <RecipeCategoriesOptions
                     clearCategories={clearCategories}
+                    prepareSearch={prepareSearch}
                     loadingCategories={loadingCategories}
                     resultSetCategories={resultSetCategories}
                     search={search}
                     selectedCategories={selectedCategories}
-                    selectedExtraFilters={selectedExtraFilters}
                     toggleCategory={toggleCategory}
                     onFiltersChange={onFiltersChange}
                 />
-                <ExtraFilters toggleExtraFilter={toggleExtraFilter} selectedExtraFilters={selectedExtraFilters} extraFilters={extraFilters} />
-                <ActiveFilters
+                {/* <ActiveFilters
                     items={activeFilters}
                     onRemove={handleRemoveActiveFilter}
                     onClearAll={clearAllFilters}
-                />
+                /> */}
             </div>
         </section>
     );
