@@ -1,4 +1,4 @@
-import { Button } from "../../../../../components/Header/ActionButton";
+import { Link } from "react-router-dom";
 import type { RecipeApiItem } from "../../../types/recipe.type";
 import { RecipeSidebarDescription } from "./RecipeSidebarDescription";
 import { RecipeSidebarHeader } from "./RecipeSidebarHeader";
@@ -25,9 +25,14 @@ export function RecipeSidebar({ recipe, onClose, open }: Props) {
           <RecipeSidebarDescription recipe={recipe} />
           <RecipeSidebarIngredients recipe={recipe} />
           <div className="mt-8 w-full flex justify-end ">
-            <Button variant="outlined" color="success" onFunction={() => { }}>
-              Ver Receita Completa
-            </Button>
+
+
+            <Link
+              to={`/receita/${recipe.idMeal}`}
+              className="inline-flex w-full items-center justify-center rounded-xl border border-green-600 px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
+            >
+              Passo a Passo
+            </Link>
           </div>
         </>
       )}

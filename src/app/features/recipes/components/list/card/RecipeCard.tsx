@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "../../../../../components/Header/ActionButton";
 import type { RecipeCardItem } from "../../../types/recipe.type";
 
@@ -11,7 +12,6 @@ interface Props {
 export function RecipeCard({ recipe, onViewDetails, aplicatedFilter }: Props) {
     return (
         <div className="rounded-xl w-full  max-w-80 min-w-80  border bg-white shadow-sm overflow-hidden">
-
             <img
                 src={recipe.image}
                 alt={recipe.name}
@@ -28,12 +28,22 @@ export function RecipeCard({ recipe, onViewDetails, aplicatedFilter }: Props) {
                 </h3>
 
 
-                <Button
-                    children={aplicatedFilter ?"Ver receita Completa" : "Ver Detalhes"}
-                    onFunction={() => onViewDetails(recipe.id)}
-                    variant="outlined"
-                    color="success"
-                />
+                {aplicatedFilter ? (
+                    <Link
+                        to={`/receita/${recipe.id}`}
+                        className="inline-flex w-full items-center justify-center rounded-xl border border-green-600 px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
+                    >
+                        Ver Detalhes completo
+                    </Link>
+                ) : (
+
+                    <Button
+                        children="Ver Detalhes"
+                        onFunction={() => onViewDetails(recipe.id)}
+                        variant="outlined"
+                        color="success"
+                    />
+                )}
 
 
             </div>

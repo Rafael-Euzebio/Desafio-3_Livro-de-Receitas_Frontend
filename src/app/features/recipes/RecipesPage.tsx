@@ -5,6 +5,7 @@ import { RecipeSidebar } from "./components/list/sidebar/RecipeSidebar";
 import { useRequestRecipes } from "./hooks/useRequestRecipes";
 import LoaderComponent from "../../components/loader/LoaderComponent";
 import { useRequestRecipesByCategory } from "./hooks/useRequestRecipesByCategory";
+import { ApiErrorModal } from "../../components/error/RequestErrorModa";
 
 
 
@@ -16,12 +17,13 @@ export function RecipesPage() {
     const [categoryFilter, setCategoryFilter] = useState([''])
 
 
+
     function handleFiltersChange(filters: {
         search: string;
         selectedCategories: string[];
     }, isCategory: boolean) {
         if (isCategory) {
-            setOpenSidebar(false)            
+            setOpenSidebar(false)
             setCategoryFilter(filters.selectedCategories);
         }
     }
@@ -29,7 +31,7 @@ export function RecipesPage() {
         loadingRecipesByCategory,
         resultSetRecipesByCategory,
         resultSetRecipesByCategoryToCard,
-        // errorRecipesByCategory,
+        errorRecipesByCategory,
     } = useRequestRecipesByCategory({
         category: categoryFilter,
     });
@@ -37,20 +39,24 @@ export function RecipesPage() {
         loadingRecipes,
         resultSetRecipes,
         resultSetRecipesToCard,
-        // errorRecipes,
+        errorRecipes,
         recipeSearchFiltered,
     } = useRequestRecipes({
         search: searchValue,
         currentRecepts: resultSetRecipesByCategory
     });
-
+    const [openErrorModal, setErrorOpenModal] = useState(!!errorRecipes || !!errorRecipesByCategory)
     const resultByCategoryIsExist = resultSetRecipesByCategory && resultSetRecipesByCategory?.meals?.length > 0
     const resultSelected = resultSetRecipesByCategoryToCard.length > 0 ? resultSetRecipesByCategoryToCard : resultSetRecipesToCard
     const resultBaseToDetails = resultByCategoryIsExist ? resultSetRecipesByCategory?.meals : resultSetRecipes
 
-    const handleControlSidebar = (recipeId: string | null) => {        
+    const handleControlSidebar = (recipeId: string | null) => {
         setSelected(recipeId)
         setOpenSidebar(!!recipeId);
+    }
+
+    function handleCloseErrorModal() {
+        setErrorOpenModal(false);
     }
 
 
@@ -73,6 +79,13 @@ export function RecipesPage() {
                 open={openSidebar}
                 recipe={resultBaseToDetails?.find((result) => result.idMeal === selected)}
                 onClose={() => handleControlSidebar(null)}
+            />
+
+            <ApiErrorModal
+                open={openErrorModal}
+                title="Erro ao buscar receitas"
+                message="Não foi possível carregar a lista de receitas no momento. Verifique sua conexão e tente novamente."
+                onClose={handleCloseErrorModal}
             />
         </div>
     )
