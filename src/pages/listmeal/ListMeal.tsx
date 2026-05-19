@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
-import CardMeal from "../cardmeal/CardMeal";
+import CardMeal from "../../components/meal/cardmeal/CardMeal";
 import { useState, useEffect } from "react";
-import { get } from "../../../services/Service";
-import type { Meal } from "../../../models/Meal";
+import { get } from "../../services/Service";
+import type { Meal } from "../../models/Meal";
 
 interface ListMealProps {
   category?: string;

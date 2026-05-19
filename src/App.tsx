@@ -1,8 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
-import Home from "./pages/home/Home";
-import ListMeal from "./components/meal/listmeal/ListMeal";
+import ListMeal from "./pages/listmeal/ListMeal";
 import MealDetails from "./components/meal/mealDetails/MealDetails";
 
 function App() {
@@ -13,7 +12,7 @@ function App() {
           <Header />
           <main className="flex-1">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<ListMeal />} />
               <Route path="/receitas" element={<ListMeal />} />
               <Route path="/meal/:id" element={<MealDetails />} />
             </Routes>

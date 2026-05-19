@@ -71,7 +71,7 @@ function MealDetails() {
     if (id) {
       fetchMealDetails();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (isLoading) {
@@ -112,7 +112,7 @@ function MealDetails() {
       {/* Hero Section com imagem principal */}
       <div className="relative h-64 md:h-96 lg:h-[500px] overflow-hidden">
         <img
-          src={getMealImage(meal.strMealThumb, 'large')}
+          src={getMealImage(meal.strMealThumb, "large")}
           alt={meal.strMeal}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -154,14 +154,13 @@ function MealDetails() {
       {/* Conteúdo Principal */}
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Coluna da Esquerda - Ingredientes e Imagem Preview */}
           <div className="lg:col-span-1">
             {/* Imagem Preview - TAMANHO PADRÃO FIXO */}
             <div className="bg-white rounded-lg shadow-md p-4 mb-6">
               <div className="w-full h-64 overflow-hidden rounded-lg bg-gray-100">
                 <img
-                  src={getMealImage(meal.strMealThumb, 'medium')}
+                  src={getMealImage(meal.strMealThumb, "medium")}
                   alt={meal.strMeal}
                   className="w-full h-full object-cover"
                   onError={(e) => {
