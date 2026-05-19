@@ -1,14 +1,21 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
 import CardMeal from "../../components/meal/cardmeal/CardMeal";
 import { useState, useEffect } from "react";
 import { get } from "../../services/Service";
 import type { Meal } from "../../models/Meal";
+import type { Area } from "../../models/Area";
 
 interface ListMealProps {
   category?: string;
   area?: string;
   searchTerm?: string;
+}
+
+interface Category {
+  strCategory: string;
 }
 
 function ListMeal({
@@ -18,60 +25,37 @@ function ListMeal({
 }: ListMealProps) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingAreas, setIsLoadingAreas] = useState<boolean>(true);
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(category);
   const [selectedArea, setSelectedArea] = useState<string>(area || "");
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>(initialSearchTerm);
   const [searchTerm, setSearchTerm] = useState<string>(initialSearchTerm);
+  const [filterError, setFilterError] = useState<string | null>(null);
 
-  // Lista de categorias disponíveis
-  const categories = [
-    "Beef",
-    "Chicken",
-    "Dessert",
-    "Lamb",
-    "Miscellaneous",
-    "Pasta",
-    "Pork",
-    "Seafood",
-    "Side",
-    "Starter",
-    "Vegan",
-    "Vegetarian",
-    "Breakfast",
-    "Goat",
-  ];
+  // Buscar categorias da API
+  const fetchCategories = async () => {
+    try {
+      await get("/list.php?c=list", (data: any) => {
+        if (data.meals) {
+          const categoryList = data.meals.map(
+            (item: Category) => item.strCategory,
+          );
+          setCategories(categoryList);
+        } else {
+          setCategories([]);
+        }
+      });
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+      setCategories([]);
+    }
+  };
 
-  // Lista de áreas populares
-  const areas = [
-    "American",
-    "British",
-    "Canadian",
-    "Chinese",
-    "Croatian",
-    "Dutch",
-    "Egyptian",
-    "French",
-    "Greek",
-    "Indian",
-    "Irish",
-    "Italian",
-    "Japanese",
-    "Kenyan",
-    "Malaysian",
-    "Mexican",
-    "Moroccan",
-    "Polish",
-    "Portuguese",
-    "Russian",
-    "Spanish",
-    "Thai",
-    "Tunisian",
-    "Turkish",
-    "Vietnamese",
-  ];
-
+  // Buscar receitas e extrair áreas únicas
   async function getMeal() {
     try {
       setIsLoading(true);
@@ -88,8 +72,17 @@ function ListMeal({
       await get(url, (data: any) => {
         if (data.meals) {
           setMeals(data.meals);
+
+          // Extrair áreas únicas das receitas carregadas
+          if (!searchTerm && !selectedArea && data.meals.length > 0) {
+            extractUniqueAreas(data.meals);
+          }
         } else {
           setMeals([]);
+          if (!searchTerm && !selectedArea) {
+            setAreas([]);
+            setIsLoadingAreas(false);
+          }
         }
       });
     } catch (error: any) {
@@ -102,11 +95,74 @@ function ListMeal({
     }
   }
 
+  // Extrair áreas únicas das receitas
+  const extractUniqueAreas = (mealsList: Meal[]) => {
+    const areasMap = new Map<string, number>();
+
+    mealsList.forEach((meal) => {
+      if (meal.strArea) {
+        const count = areasMap.get(meal.strArea) || 0;
+        areasMap.set(meal.strArea, count + 1);
+      }
+    });
+
+    const areasList: Area[] = Array.from(areasMap.entries()).map(
+      ([areaName, count]) => ({
+        strArea: areaName,
+        strCountry: areaName,
+        recipeCount: count,
+        recipes: [],
+      }),
+    );
+
+    // Ordenar por quantidade de receitas
+    areasList.sort((a, b) => (b.recipeCount || 0) - (a.recipeCount || 0));
+
+    setAreas(areasList);
+    setIsLoadingAreas(false);
+  };
+
+  // Buscar todas as áreas disponíveis (primeira carga)
+  const fetchAllAreas = async () => {
+    try {
+      setIsLoadingAreas(true);
+
+      // Buscar uma categoria que geralmente tem muitas receitas para extrair áreas
+      await get("/filter.php?c=Beef", (data: any) => {
+        if (data.meals && data.meals.length > 0) {
+          extractUniqueAreas(data.meals);
+        } else {
+          // Fallback: buscar receitas aleatórias
+          get("/search.php?s=", (fallbackData: any) => {
+            if (fallbackData.meals && fallbackData.meals.length > 0) {
+              extractUniqueAreas(fallbackData.meals);
+            } else {
+              setIsLoadingAreas(false);
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Erro ao buscar áreas:", error);
+      setIsLoadingAreas(false);
+    }
+  };
+
+  // Carregar categorias e áreas ao montar o componente
+  useEffect(() => {
+    fetchCategories();
+    fetchAllAreas();
+  }, []);
+
+  // Buscar receitas quando os filtros mudarem
+  useEffect(() => {
+    getMeal();
+  }, [selectedCategory, selectedArea, searchTerm]);
+
   // Função para lidar com a pesquisa
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchTerm(searchInput);
-    // Limpa outros filtros quando pesquisa
     setSelectedCategory("");
     setSelectedArea("");
   };
@@ -123,8 +179,8 @@ function ListMeal({
   const handleCategoryChange = (newCategory: string) => {
     setSelectedCategory(newCategory);
     setSelectedArea("");
-    setSearchTerm(""); // Limpa pesquisa quando muda categoria
-    setSearchInput(""); // Limpa input da pesquisa
+    setSearchTerm("");
+    setSearchInput("");
     setShowFilters(false);
   };
 
@@ -132,8 +188,8 @@ function ListMeal({
   const handleAreaChange = (newArea: string) => {
     setSelectedArea(newArea);
     setSelectedCategory("");
-    setSearchTerm(""); // Limpa pesquisa quando muda área
-    setSearchInput(""); // Limpa input da pesquisa
+    setSearchTerm("");
+    setSearchInput("");
     setShowFilters(false);
   };
 
@@ -146,23 +202,8 @@ function ListMeal({
     setShowFilters(false);
   };
 
-  useEffect(() => {
-    getMeal();
-  }, [selectedCategory, selectedArea, searchTerm]);
-
   function handleMealClick(meal: Meal) {
     navigate(`/meal/${meal.idMeal}`);
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando receitas...</p>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -234,6 +275,7 @@ function ListMeal({
               )}
             </div>
           </div>
+
           {/* Botão para mostrar/esconder filtros em mobile */}
           <div className="md:hidden mb-4">
             <button
@@ -244,6 +286,7 @@ function ListMeal({
               {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
             </button>
           </div>
+
           {/* Filtros de Categorias e Áreas */}
           <div className={`${showFilters ? "block" : "hidden"} md:block mb-6`}>
             {/* Categorias */}
@@ -268,26 +311,51 @@ function ListMeal({
               </div>
             </div>
 
-            {/* Áreas */}
+            {/* Áreas - Extraídas diretamente das receitas */}
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Países/Regiões:
+                Países/Regiões com receitas:
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {areas.slice(0, 12).map((area) => (
-                  <button
-                    key={area}
-                    onClick={() => handleAreaChange(area)}
-                    className={`px-4 py-2 rounded-full transition-all ${
-                      selectedArea === area
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-green-100"
-                    }`}
-                  >
-                    {area}
-                  </button>
-                ))}
-              </div>
+
+              {isLoadingAreas ? (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                    <span className="text-sm text-gray-600">
+                      Carregando regiões disponíveis...
+                    </span>
+                  </div>
+                </div>
+              ) : areas.length === 0 ? (
+                <p className="text-gray-500 text-sm">
+                  Nenhuma região encontrada
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                  {areas.map((areaItem) => (
+                    <button
+                      key={areaItem.strArea}
+                      onClick={() => handleAreaChange(areaItem.strArea)}
+                      className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
+                        selectedArea === areaItem.strArea
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-green-100"
+                      }`}
+                    >
+                      <span>{areaItem.strArea}</span>
+                      <span
+                        className={`text-xs ${
+                          selectedArea === areaItem.strArea
+                            ? "text-green-200"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        ({areaItem.recipeCount})
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Botão Reset */}
@@ -300,6 +368,7 @@ function ListMeal({
               </button>
             )}
           </div>
+
           {/* Indicador do filtro ativo */}
           <div className="mb-4 text-sm text-gray-600">
             {searchTerm ? (
@@ -325,8 +394,16 @@ function ListMeal({
             )}
             <span className="ml-2">({meals.length} receitas encontradas)</span>
           </div>
+
           {/* Lista de Receitas */}
-          {meals.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">Carregando receitas...</p>
+              </div>
+            </div>
+          ) : meals.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500">
                 {searchTerm

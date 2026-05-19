@@ -10,6 +10,9 @@ function Header() {
           </div>
 
           <nav className="hidden md:flex space-x-6">
+            <Link to="/regions" className="hover:text-green-200 transition">
+              Regiões
+            </Link>
             <Link to="/receitas" className="hover:text-green-200 transition">
               Receitas
             </Link>
