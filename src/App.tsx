@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
 import ListMeal from "./pages/listmeal/ListMeal";
-import MealDetails from "./components/meal/mealDetails/MealDetails";
+import MealDetails from "./pages/mealDetails/MealDetails";
 
 function App() {
   return (
