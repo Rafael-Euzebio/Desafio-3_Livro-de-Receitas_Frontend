@@ -1,102 +1,222 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { get } from "../../services/Service";
+import { useParams, useNavigate } from "react-router-dom";
+
+import { ToastAlerta } from "../../utils/ToastAlerta";
+import { SyncLoader } from "react-spinners";
 import type { Meal } from "../../models/Meal";
-import { getMealImage } from "../../utils/imagesUtil";
+import { getMealById } from "../../services/Service";
 
 function MealDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [meal, setMeal] = useState<Meal | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
+  const [meal, setMeal] = useState<Meal | null>(null);
 
-  // Função para extrair ingredientes e medidas
-  const getIngredientsList = (meal: Meal) => {
-    const ingredients: { ingredient: string; measure: string }[] = [];
+  // Função para verificar tipo de erro (melhorada)
+  function handleApiError(error: any): string {
+    const errorMessage = error?.message || error?.toString() || "";
+    
+    // Log detalhado do erro para debug
+    console.error("Detalhes do erro:", {
+      message: errorMessage,
+      code: error?.code,
+      status: error?.response?.status,
+      response: error?.response?.data
+    });
 
-    for (let i = 1; i <= 20; i++) {
-      const ingredient = meal[`strIngredient${i}` as keyof Meal];
-      const measure = meal[`strMeasure${i}` as keyof Meal];
-
-      if (
-        ingredient &&
-        typeof ingredient === "string" &&
-        ingredient.trim() !== ""
-      ) {
-        ingredients.push({
-          ingredient: ingredient.trim(),
-          measure:
-            (measure && typeof measure === "string" ? measure.trim() : "") ||
-            "",
-        });
-      }
+    // Erros de conexão
+    if (
+      errorMessage.includes("conexão") ||
+      errorMessage.includes("internet") ||
+      errorMessage.includes("ECONNABORTED") ||
+      errorMessage.includes("Network Error") ||
+      error?.code === "ERR_NETWORK" ||
+      error?.code === "ECONNABORTED"
+    ) {
+      setIsConnectionError(true);
+      return "Erro de conexão. Verifique sua internet e tente novamente.";
     }
 
-    return ingredients;
-  };
+    // Timeout específico
+    if (
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("Tempo limite")
+    ) {
+      setIsConnectionError(true);
+      return "Tempo limite excedido. O servidor demorou muito para responder.";
+    }
 
-  // Função para extrair tags
-  const getTags = (meal: Meal) => {
-    return meal.strTags ? meal.strTags.split(",") : [];
-  };
+    // Erro 404
+    if (error?.response?.status === 404 || errorMessage.includes("404")) {
+      setIsConnectionError(false);
+      return "Receita não encontrada. O ID pode ser inválido ou a receita foi removida.";
+    }
 
-  // Função para obter ID do YouTube
-  const getYoutubeId = (url: string) => {
-    const match = url.match(/[?&]v=([^&]+)/);
-    return match ? match[1] : null;
-  };
+    // Erro 400
+    if (error?.response?.status === 400 || errorMessage.includes("400")) {
+      setIsConnectionError(false);
+      return "Requisição inválida. Tente novamente mais tarde.";
+    }
 
+    // Erro 500
+    if (error?.response?.status === 500 || errorMessage.includes("500")) {
+      setIsConnectionError(false);
+      return "Erro no servidor. Tente novamente mais tarde.";
+    }
+
+    setIsConnectionError(false);
+    return "Erro ao carregar detalhes da receita. Tente novamente mais tarde.";
+  }
+
+  // Buscar detalhes da receita
   async function fetchMealDetails() {
+    if (!id) {
+      setError("ID da receita não encontrado");
+      ToastAlerta("ID da receita não encontrado", "erro");
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-      await get(`/lookup.php?i=${id}`, (data: any) => {
-        if (data.meals && data.meals.length > 0) {
-          setMeal(data.meals[0]);
+      setIsConnectionError(false);
+
+      await getMealById(id, (data: Meal) => {
+        if (data && data.idMeal) {
+          setMeal(data);
         } else {
           setError("Receita não encontrada");
+          ToastAlerta("Receita não encontrada", "info");
         }
       });
     } catch (error: any) {
-      console.error("Erro ao buscar receita:", error);
-      setError("Erro ao carregar os detalhes da receita");
+      console.error("Erro ao buscar detalhes da receita:", error);
+      const userMessage = handleApiError(error);
+      setError(userMessage);
+      ToastAlerta(userMessage, "erro");
     } finally {
       setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    if (id) {
-      fetchMealDetails();
-    }
+    fetchMealDetails();
   }, [id]);
 
+  // Função para extrair ingredientes e medidas
+  function getIngredientsList(meal: Meal) {
+    const ingredients = [];
+    for (let i = 1; i <= 20; i++) {
+      const ingredient = meal[`strIngredient${i}` as keyof Meal];
+      const measure = meal[`strMeasure${i}` as keyof Meal];
+      if (ingredient && ingredient.trim() && ingredient !== "") {
+        ingredients.push({
+          ingredient: ingredient,
+          measure: measure || "",
+        });
+      }
+    }
+    return ingredients;
+  }
+
+  // Extrair tags
+  function getTags(meal: Meal): string[] {
+    if (!meal.strTags) return [];
+    return meal.strTags.split(",").map((tag) => tag.trim());
+  }
+
+  // Extrair ID do YouTube
+  function getYoutubeId(url: string): string | null {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+    return match ? match[1] : null;
+  }
+
+  // Botão de tentar novamente
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando receita...</p>
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <SyncLoader color="#16a34a" size={20} />
       </div>
     );
   }
 
   if (error || !meal) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <p className="text-red-600 text-xl mb-4">
-            {error || "Receita não encontrada"}
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-10">
+          <div
+            className={`rounded-lg p-6 max-w-md mx-auto ${
+              isConnectionError
+                ? "bg-yellow-50 border border-yellow-200"
+                : "bg-red-50 border border-red-200"
+            }`}
           >
-            Voltar para o início
-          </button>
+            <div className="flex items-start gap-3">
+              <div className="shrink-0">
+                {isConnectionError ? (
+                  <svg
+                    className="w-6 h-6 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <p
+                  className={`${isConnectionError ? "text-yellow-700" : "text-red-600"}`}
+                >
+                  {error || "Receita não encontrada"}
+                </p>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <button
+                    onClick={fetchMealDetails}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  >
+                    Tentar novamente
+                  </button>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Voltar para o início
+                  </button>
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Voltar para página anterior
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -104,23 +224,25 @@ function MealDetails() {
 
   const ingredients = getIngredientsList(meal);
   const tags = getTags(meal);
-  const youtubeId = meal.strYoutube ? getYoutubeId(meal.strYoutube) : null;
+  const youtubeId = getYoutubeId(meal.strYoutube);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section - Altura responsiva gradual */}
       <div className="relative h-48 sm:h-60 md:h-80 lg:h-96 xl:h-[500px] overflow-hidden">
         <img
-          src={getMealImage(meal.strMealThumb, "large")}
+          src={meal.strMealThumb}
           alt={meal.strMeal}
           className="w-full h-full object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = meal.strMealThumb;
+            (e.target as HTMLImageElement).src =
+              "https://via.placeholder.com/800x400?text=Imagem+não+disponível";
+            ToastAlerta("Não foi possível carregar a imagem da receita", "aviso");
           }}
         />
 
         {/* Gradiente inferior */}
-        <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-linear-to-t from-black/70 via-black/40 to-transparent"></div>
+        <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
 
         {/* Conteúdo do Hero - Padding responsivo */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 lg:p-8 text-white">
@@ -165,9 +287,9 @@ function MealDetails() {
           <div className="md:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6 sticky top-16 md:top-20">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-                Ingredientes
+                📝 Ingredientes
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {ingredients.map((item, index) => (
                   <div
                     key={index}
@@ -176,11 +298,11 @@ function MealDetails() {
                     <input
                       type="checkbox"
                       id={`ingredient-${index}`}
-                      className="w-4 h-4 text-green-600 rounded mt-0.5 shrink-0"
+                      className="w-4 h-4 text-green-600 rounded mt-0.5 shrink-0 cursor-pointer"
                     />
                     <label
                       htmlFor={`ingredient-${index}`}
-                      className="text-gray-700 cursor-pointer text-sm sm:text-base"
+                      className="text-gray-700 cursor-pointer text-sm sm:text-base hover:text-gray-900 transition"
                     >
                       <span className="font-medium">{item.measure}</span>{" "}
                       {item.ingredient}
@@ -196,7 +318,7 @@ function MealDetails() {
             {/* Instruções */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-                Modo de Preparo
+                👩‍🍳 Modo de Preparo
               </h2>
               <div className="prose max-w-none">
                 <p className="text-gray-700 whitespace-pre-line leading-relaxed text-sm sm:text-base">
@@ -209,7 +331,7 @@ function MealDetails() {
             {youtubeId && (
               <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-                  Vídeo da Receita
+                  📺 Vídeo da Receita
                 </h2>
                 <div className="aspect-video rounded-lg overflow-hidden">
                   <iframe
@@ -229,8 +351,8 @@ function MealDetails() {
             {/* Fonte */}
             {meal.strSource && (
               <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                  Fonte
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  🔗 Fonte
                 </h2>
                 <a
                   href={meal.strSource}
@@ -249,13 +371,13 @@ function MealDetails() {
                 onClick={() => window.print()}
                 className="flex-1 bg-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                Imprimir
+                🖨️ Imprimir
               </button>
               <button
                 onClick={() => navigate("/")}
                 className="flex-1 bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                Início
+                🏠 Início
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
 import ListMeal from "./pages/listmeal/ListMeal";
 import MealDetails from "./pages/mealDetails/MealDetails";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">
+            <ToastContainer />
             <Routes>
               <Route path="/" element={<ListMeal />} />
               <Route path="/receitas" element={<ListMeal />} />
