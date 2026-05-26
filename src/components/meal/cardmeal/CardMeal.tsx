@@ -24,9 +24,6 @@ function CardMeal({
     }
   };
 
-  // Extrair as primeiras 2 tags
-  const tags = meal.strTags ? meal.strTags.split(",").slice(0, 2) : [];
-
   return (
     <div
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col h-full"
@@ -40,20 +37,6 @@ function CardMeal({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
-
-        {/* Badge de tags - Tamanho responsivo */}
-        {tags.length > 0 && (
-          <div className="absolute top-2 right-2 flex gap-1">
-            {tags.map((tag, index) => (
-              <span
-                key={index}
-                className="bg-black bg-opacity-70 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full backdrop-blur-sm"
-              >
-                {tag.trim()}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Conteúdo do card */}
