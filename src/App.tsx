@@ -1,11 +1,29 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Footer from "./components/footer/Footer";
+import Header from "./components/header/Header";
+import ListMeal from "./pages/listmeal/ListMeal";
+import MealDetails from "./pages/mealDetails/MealDetails";
+import { ToastContainer } from "react-toastify";
+
 function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-center text-4xl font-semibold text-stone-900">
-        Desafio 3: Livro de Receitas
-      </h1>
-    </main>
-  )
+    <>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <ToastContainer />
+            <Routes>
+              <Route path="/" element={<ListMeal />} />
+              <Route path="/receitas" element={<ListMeal />} />
+              <Route path="/meal/:id" element={<MealDetails />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </BrowserRouter>
+    </>
+  );
 }
 
-export default App
+export default App;
