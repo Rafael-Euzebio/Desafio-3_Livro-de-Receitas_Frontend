@@ -1,4 +1,4 @@
-# Desafio 3 — Explorador de Receitas
+# Desafio 3 — Apicius
 
 ## Visão geral
 
@@ -11,6 +11,8 @@ A aplicação deve incluir navegação entre páginas, consumo de API e renderiz
 ![Exemplo catálogo](./examples/catalog.png)
 
 ![Exemplo detalhe](./examples/details.png)
+
+O nome Apicius faz referência a uma antiga compilação culinária associada à Roma Antiga, conhecida por reunir receitas e práticas gastronômicas daquele período. Neste desafio, a ideia é construir uma versão moderna de um livro de receitas: uma aplicação onde o usuário pode explorar pratos, navegar entre páginas e visualizar detalhes de preparo.
 
 ---
 
